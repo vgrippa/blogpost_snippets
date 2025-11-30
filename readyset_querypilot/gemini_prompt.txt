@@ -1,42 +1,63 @@
-I have a MySQL 8.0.43 database running on the following connection parameters:
-	•	Host: XXXX
-	•	Port: 3306
-	•	User: readyset_repl
-	•	Password: readyset_repl
+Act as an expert Python developer. I need a high-performance, multi-threaded command-line script to perform a stress test on a MySQL database.
 
-The database contains the employees sample dataset imported from GitHub.
+Database Configuration:
 
-I want you to generate a Python HR application that simulates typical queries an internal HR system would perform against this database.
+Host: XXXXX
 
-Requirements
-	1.	The application must be a command-line Python script.
-	2.	It must accept a numeric parameter N, where N defines how many simulated requests the application will execute.
-	3.	All database connection parameters (host, port, user, password, database name) must be defined at the beginning of the script in a clearly visible configuration section.
-	4.	The script should use a standard MySQL connector library for Python (e.g., mysql-connector-python or pymysql), and handle connections and cursors safely (open/close properly, basic error handling).
-	5.	For each of the N requests, the application should randomly choose one query type from a pool of at least 20 different query patterns, ranging from simple to complex. These should include, for example:
-	•	Simple single-table lookups (e.g., fetch employee by emp_no).
-	•	Listing employees in a given department.
-	•	Listing departments and their current managers.
-	•	Fetching current salary for a given employee.
-	•	Fetching full salary history for an employee.
-	•	Listing employees hired within a given date range.
-	•	Listing employees by job title.
-	•	Aggregations (e.g., average salary per department).
-	•	Aggregations by title (e.g., max/min/avg salary by title).
-	•	Top N highest-paid employees overall.
-	•	Top N highest-paid employees per department.
-	•	Counting employees per department.
-	•	Pagination-style queries (e.g., get a “page” of employees with LIMIT/OFFSET).
-	•	Search-like queries (e.g., employees whose last name starts with a given letter).
-	•	Multi-join queries combining employees, departments, dept_emp, titles, and salaries.
-	•	Subquery-based queries (e.g., employees whose salary is above the average salary of their department).
-	•	Queries involving ordering and filtering (e.g., ordered by hire date, or salary descending).
-	•	A query that finds employees who changed titles at least once.
-	•	A query that finds departments with no current manager (if any).
-	•	Any additional realistic HR-related queries to reach at least 20 distinct query types.
-	6.	The script must be structured so that each query type is implemented as a separate function or clearly separated block, and there is a central dispatcher that picks one at random for each request.
-	7.	For each request, the script should:
-	•	Execute the chosen query.
-	•	Print a short description of the query type being run.
-	•	Print a small, readable subset of the results to the console (not the entire table).
-	8.	The script should be easy to modify so that I can later adjust or add new query types.
+Port: 3306
+
+User: readyset_repl
+
+Password: XXXX
+
+Database: employees
+
+Core Requirements:
+
+Library: Use mysql-connector-python.
+
+Concurrency: The script must use mysql.connector.pooling for connection management and concurrent.futures.ThreadPoolExecutor to run requests in parallel.
+
+Arguments: The script must accept two command-line arguments:
+
+Total Requests (int): How many total queries to run.
+
+Concurrency (int): The size of the connection pool and the number of worker threads.
+
+Performance: Do not limit the QPS (Queries Per Second). The script should run as fast as the network/CPU allows (no time.sleep).
+
+Query Logic (OLTP Focus): The goal is to simulate a real-time HR application with fast, indexed lookups.
+
+Avoid Aggregates: Do not use GROUP BY, AVG, or COUNT(*) on large tables. Focus on transactional queries using Primary Keys or Indexes.
+
+Query Types: Implement 8 distinct query functions representing these application actions:
+
+Login Check: Fetch ID/Name by emp_no.
+
+View Profile: Join employees, titles, departments, salaries for a specific emp_no.
+
+Latest Salary: Fetch the most recent salary entry for an emp_no.
+
+Team View: List 10 employees in a specific department.
+
+Job History: Fetch title history for an emp_no.
+
+Manager Lookup: Find the current manager of a random department.
+
+Search by Name: Find employees where last_name starts with a random 3-letter prefix.
+
+Recent Hires: Find employees hired in a specific year range (simple range scan).
+
+Randomization: For every request, a worker thread should randomly select one of these 8 query types. Use a helper to generate valid random emp_no (range 10001 to 300000) to ensure data is found.
+
+Reporting Requirements: At the end of the execution, print a detailed Performance Report containing:
+
+Total Execution Time.
+
+Throughput (QPS): Queries Per Second.
+
+Average Latency: In milliseconds.
+
+Query Distribution: A list showing exactly how many times each of the 8 query types was executed.
+
+Error Analysis: A summary of failed queries and their error messages (if any).
