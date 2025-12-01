@@ -1,7 +1,0 @@
-Improve this prompt for Gemini. The instance is MySQL 8.0.43.
-
-I have a MySQL database where I imported the employees sample database from GitHub. The user is readyset_repl, the password is readyset_repl, the port is 3306, and the host is 52.91.141.5.
-
-I want you to create an HR application written in Python to simulate requests that a regular application would perform. The command line in the application needs to have an N parameter, where N represents the number of requests the app will execute. The database parameters need to be at the beginning of the script.
-
-Add a few more details: I need at least 20 different types of queries, ranging from simple direct queries to more complex ones.

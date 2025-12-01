@@ -1,63 +1,73 @@
-Act as an expert Python developer. I need a high-performance, multi-threaded command-line script to perform a stress test on a MySQL database.
+Act as a Senior Backend Engineer specializing in Go (Golang) and Performance Testing.
 
-Database Configuration:
+I need a high-performance Load Generator Script written in Go to stress test a MySQL database.
 
-Host: XXXXX
+The Concept ("CorpCRM"): Instead of random queries, simulate a CRM system used by 3 different departments. The script should simulate traffic coming from these distinct modules:
+
+Auth Module: Used by everyone (Login, Session Checks).
+
+Sales Module: Used by reps (Viewing Profiles, Checking Commissions/Salaries, Finding Managers).
+
+HR/Admin Module: Used by admins (Department Rosters, History Lookups, New Hire Reports, User Search).
+
+Database Details:
+
+Host: 52.91.141.5
 
 Port: 3306
 
-User: readyset_repl
+User/Pass: readyset_repl / readyset_repl
 
-Password: XXXX
+DB Name: employees
 
-Database: employees
+Technical Requirements:
 
-Core Requirements:
+Language: Go.
 
-Library: Use mysql-connector-python.
+Concurrency: Use Goroutines and Channels. The script must accept Command Line Arguments for <TotalRequests> and <Concurrency>.
 
-Concurrency: The script must use mysql.connector.pooling for connection management and concurrent.futures.ThreadPoolExecutor to run requests in parallel.
+Connection Pooling (Crucial): Do not open/close connections per request. Use sql.Open once, and properly configure db.SetMaxOpenConns and db.SetMaxIdleConns to match the concurrency level.
 
-Arguments: The script must accept two command-line arguments:
+Zero Think-Time: The queries must run immediately one after the other to test maximum throughput (QPS). No time.Sleep.
 
-Total Requests (int): How many total queries to run.
+Data Generators: Use random Employee IDs between 10001 and 40000. Use ActiveDate = '9999-01-01' for current records.
 
-Concurrency (int): The size of the connection pool and the number of worker threads.
+The Queries (Implement these 10):
 
-Performance: Do not limit the QPS (Queries Per Second). The script should run as fast as the network/CPU allows (no time.sleep).
+[Auth] Login: Fetch name/hire_date by PK.
 
-Query Logic (OLTP Focus): The goal is to simulate a real-time HR application with fast, indexed lookups.
+[Auth] Session: Check dept assignment by PK.
 
-Avoid Aggregates: Do not use GROUP BY, AVG, or COUNT(*) on large tables. Focus on transactional queries using Primary Keys or Indexes.
+[Sales] View Profile: Join Employees + Titles + Salaries (Active).
 
-Query Types: Implement 8 distinct query functions representing these application actions:
+[Sales] Check Commission: Simple Select on Salary (Active).
 
-Login Check: Fetch ID/Name by emp_no.
+[Sales] Find Team Lead: Lookup manager for a random department.
 
-View Profile: Join employees, titles, departments, salaries for a specific emp_no.
+[HR] Title History: Select all titles for a user.
 
-Latest Salary: Fetch the most recent salary entry for an emp_no.
+[HR] Dept Roster: Select active employees in a dept (Limit 20).
 
-Team View: List 10 employees in a specific department.
+[HR] New Hires: Range scan for recent hires (Limit 10).
 
-Job History: Fetch title history for an emp_no.
+[Admin] Search User: Search by First Name (e.g., 'Georgi').
 
-Manager Lookup: Find the current manager of a random department.
+[Sys] Heartbeat: SELECT 1.
 
-Search by Name: Find employees where last_name starts with a random 3-letter prefix.
+Execution Logic:
 
-Recent Hires: Find employees hired in a specific year range (simple range scan).
+Create a weighted list of actions (put Login and Profile twice so they happen more often).
 
-Randomization: For every request, a worker thread should randomly select one of these 8 query types. Use a helper to generate valid random emp_no (range 10001 to 300000) to ensure data is found.
+Spawn N workers.
 
-Reporting Requirements: At the end of the execution, print a detailed Performance Report containing:
+Each worker loops through jobs, picks a random CRM Action, executes it, and records the result string.
 
-Total Execution Time.
+Reporting: At the end, print a clean report showing:
 
-Throughput (QPS): Queries Per Second.
+Total Duration.
 
-Average Latency: In milliseconds.
+Throughput (QPS).
 
-Query Distribution: A list showing exactly how many times each of the 8 query types was executed.
+Success/Error Counts.
 
-Error Analysis: A summary of failed queries and their error messages (if any).
+A distribution table showing how many times each "CRM Module" action was executed.
