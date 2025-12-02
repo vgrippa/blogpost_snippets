@@ -1,0 +1,19 @@
+Write a high-performance database load testing script in Go (Golang). The script should simulate a Corporate CRM application called 'CorpCRM' interacting with a MySQL database.
+
+Instead of random queries, structure the workload around three business modules:
+
+Auth: Login and session checks.
+
+Sales: Sales reps checking profiles, salaries, and looking up managers.
+
+HR/Admin: Admins checking department rosters, history, and searching for users.
+
+Requirements:
+
+The script must use Connection Pooling (SetMaxOpenConns) to handle high concurrency efficiently.
+
+It should accept command-line arguments for the total number of requests and the number of concurrent threads.
+
+It must run with zero think-time (immediate execution) to test maximum throughput.
+
+At the end, generate a report showing the Total Duration, Queries Per Second (QPS), and a distribution of which CRM modules were accessed."
