@@ -1,3 +1,42 @@
+/*
+==============================================================================
+High-Performance CRM Database Load Simulator (Go)
+==============================================================================
+
+DESCRIPTION:
+  This script simulates a realistic high-concurrency workload for a "CorpCRM"
+  application. It bypasses "think-time" (sleeps) to stress-test the database's
+  maximum throughput (QPS) using a persistent connection pool.
+
+SCENARIOS SIMULATED:
+  - Auth Module:  Login checks, Session validation.
+  - Sales Module: Profile views, Salary/Commission checks, Manager lookups.
+  - HR Module:    Rosters, Title history, New hire reports.
+  - Admin Module: User search.
+
+PREREQUISITES:
+  1. Initialize Go module:
+     $ go mod init crm_load
+  2. Install MySQL Driver:
+     $ go get -u github.com/go-sql-driver/mysql
+
+USAGE:
+  go run main.go <Total_Requests> <Concurrency>
+
+ARGUMENTS:
+  <Total_Requests> : Total number of SQL queries to execute.
+  <Concurrency>    : Number of parallel threads (Goroutines) and the size
+                     of the database connection pool.
+
+EXAMPLES:
+  # Light Test (1,000 requests, 10 threads)
+  $ go run main.go 1000 10
+
+  # Heavy Stress Test (100,000 requests, 100 threads)
+  $ go run main.go 100000 100
+
+==============================================================================
+*/
 package main
 
 import (
