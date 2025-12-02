@@ -1,0 +1,45 @@
+ct as a Senior Go Developer. Write a robust load testing CLI tool in Go targeting a MySQL database.
+
+Configuration:
+
+DB: Host: XXXX, User/Pass: readyset_repl, DB: employees.
+
+Constants: ActiveDate = '9999-01-01', Departments = ['d001'...'d009'].
+
+Architecture:
+
+Use database/sql with the go-sql-driver/mysql driver.
+
+Pooling: In main(), initialize sql.Open once. Set db.SetMaxOpenConns and db.SetMaxIdleConns equal to the user-provided concurrency limit to ensure a persistent pool.
+
+Concurrency: Use a Worker Pool pattern (Goroutines + Channels) to execute requests.
+
+The Workload (10 Specific Functions): Implement these exact SQL patterns inside a CRMAction type:
+
+[Auth] Login: Select name/hire_date by PK.
+
+[Auth] Session: Select dept_no by PK.
+
+[Sales] Profile: Join employees, titles, salaries on emp_no.
+
+[Sales] Salary: Select salary from salaries table.
+
+[Sales] Manager: Select emp_no from dept_manager for a random dept.
+
+[HR] History: Select all titles for a user.
+
+[HR] Roster: Select emp_no from dept_emp (Limit 20).
+
+[HR] New Hires: Select users hired after '1999-10-01' (Limit 10).
+
+[Admin] Search: Select users where first_name = 'Georgi'.
+
+[Sys] Heartbeat: SELECT 1.
+
+Execution:
+
+Accept TotalRequests and Concurrency from os.Args.
+
+Randomly select actions from a weighted list (make Login and Profile occur more frequently).
+
+Output a final performance report including Duration, QPS, and a breakdown of action counts."
