@@ -1,73 +1,33 @@
-Act as a Senior Backend Engineer specializing in Go (Golang) and Performance Testing.
+Create a single-file Go (Golang) application that simulates a backend CRM (Customer Relationship Management) workload connecting to a MySQL database.
 
-I need a high-performance Load Generator Script written in Go to stress test a MySQL database.
+The target database is the standard MySQL 'employees' sample schema.
 
-The Concept ("CorpCRM"): Instead of random queries, simulate a CRM system used by 3 different departments. The script should simulate traffic coming from these distinct modules:
+Key Requirements:
 
-Auth Module: Used by everyone (Login, Session Checks).
+1. Configuration:
+   - Include constants for DB credentials (User, Password, Host, Port, Name).
+   - Allow configuration for 'Total Requests' and 'Concurrency' (number of goroutines).
 
-Sales Module: Used by reps (Viewing Profiles, Checking Commissions/Salaries, Finding Managers).
+2. Architecture:
+   - Use the standard `database/sql` and `github.com/go-sql-driver/mysql` drivers.
+   - Implement a robust connection pool (SetMaxOpenConns, SetMaxIdleConns).
 
-HR/Admin Module: Used by admins (Department Rosters, History Lookups, New Hire Reports, User Search).
+3. Workload Simulation (The "Vibe"):
+   - Create distinct "Modules" or "Departments" to simulate different user types.
+   - HR Module: Run queries involving `employees`, `titles`, and `departments` (e.g., "Find Dept Roster", "View Title History"). Use JOINs.
+   - Sales Module: Run queries involving `salaries` and `dept_emp` (e.g., "Check Commission", "Find Team Lead").
+   - Auth Module: Simple SELECTs (e.g., "Login", "Validate Session").
+   - Admin Module: Complex search queries.
 
-Database Details:
+4. Execution Flow:
+   - The main function should spawn [Concurrency] worker goroutines.
+   - Each worker should randomly select a "Module" and an "Action" to perform.
+   - Measure the total execution time.
 
-Host: 52.91.141.5
+5. Reporting:
+   - At the end, print a clean summary to the console:
+     - Total Time
+     - Calculated QPS (Throughput)
+     - Breakdown of how many times each module/action was called.
 
-Port: 3306
-
-User/Pass: readyset_repl / readyset_repl
-
-DB Name: employees
-
-Technical Requirements:
-
-Language: Go.
-
-Concurrency: Use Goroutines and Channels. The script must accept Command Line Arguments for <TotalRequests> and <Concurrency>.
-
-Connection Pooling (Crucial): Do not open/close connections per request. Use sql.Open once, and properly configure db.SetMaxOpenConns and db.SetMaxIdleConns to match the concurrency level.
-
-Zero Think-Time: The queries must run immediately one after the other to test maximum throughput (QPS). No time.Sleep.
-
-Data Generators: Use random Employee IDs between 10001 and 40000. Use ActiveDate = '9999-01-01' for current records.
-
-The Queries (Implement these 10):
-
-[Auth] Login: Fetch name/hire_date by PK.
-
-[Auth] Session: Check dept assignment by PK.
-
-[Sales] View Profile: Join Employees + Titles + Salaries (Active).
-
-[Sales] Check Commission: Simple Select on Salary (Active).
-
-[Sales] Find Team Lead: Lookup manager for a random department.
-
-[HR] Title History: Select all titles for a user.
-
-[HR] Dept Roster: Select active employees in a dept (Limit 20).
-
-[HR] New Hires: Range scan for recent hires (Limit 10).
-
-[Admin] Search User: Search by First Name (e.g., 'Georgi').
-
-[Sys] Heartbeat: SELECT 1.
-
-Execution Logic:
-
-Create a weighted list of actions (put Login and Profile twice so they happen more often).
-
-Spawn N workers.
-
-Each worker loops through jobs, picks a random CRM Action, executes it, and records the result string.
-
-Reporting: At the end, print a clean report showing:
-
-Total Duration.
-
-Throughput (QPS).
-
-Success/Error Counts.
-
-A distribution table showing how many times each "CRM Module" action was executed.
+Please write the complete, ready-to-run code.
